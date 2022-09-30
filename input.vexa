@@ -1,0 +1,4 @@
+int teste(){
+    int teste = "Te45";
+    char teste = 'T';
+}
