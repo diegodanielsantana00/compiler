@@ -1,4 +1,4 @@
-package br.com.diegodanielsantana00.compiler.lexico;
+package br.com.diegodanielsantana00.compiler.lexical;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;

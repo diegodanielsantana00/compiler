@@ -1,7 +1,7 @@
 package br.com.diegodanielsantana00.compiler.parser;
 
-import br.com.diegodanielsantana00.compiler.lexico.VexaScanner;
-import br.com.diegodanielsantana00.compiler.lexico.Token;
+import br.com.diegodanielsantana00.compiler.lexical.Token;
+import br.com.diegodanielsantana00.compiler.lexical.VexaScanner;
 
 public class VexaParser {
 

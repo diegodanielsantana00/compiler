@@ -1,4 +1,4 @@
-package br.com.diegodanielsantana00.compiler.lexico;
+package br.com.diegodanielsantana00.compiler.lexical;
 
 public class Token {
 	public static final int TK_IDENTIFIER = 0;
