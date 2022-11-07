@@ -1,8 +1,8 @@
 package br.com.diegodanielsantana00.compiler.lexical;
+
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 
 import br.com.diegodanielsantana00.compiler.exceptions.VexaLexicalException;
 
@@ -11,6 +11,7 @@ public class VexaScanner {
 	private char[] content;
 	private int estado;
 	private int pos;
+
 	private int line;
 	private int column;
 
@@ -20,6 +21,9 @@ public class VexaScanner {
 			column = 0;
 			String txtConteudo;
 			txtConteudo = new String(Files.readAllBytes(Paths.get(filename)), StandardCharsets.UTF_8);
+			System.out.println("--- INPUT ---");
+			System.out.println(txtConteudo);
+			System.out.println("-------------");
 			content = txtConteudo.toCharArray();
 			pos = 0;
 		} catch (Exception ex) {
@@ -29,40 +33,52 @@ public class VexaScanner {
 
 	public Token nextToken() {
 		char currentChar;
-		Token token;
+		Token token = null;
 		String term = "";
-		boolean doubleBool = true;
-		boolean charAux = false;
-		if (isEndFile()) {
+		if (isEOF()) {
 			return null;
 		}
+
 		estado = 0;
-		while (true) {
+		while (pos < content.length) {
+			if (isEOF()) {
+				return null;
+			}
 			currentChar = nextChar();
 			column++;
 
 			switch (estado) {
 				case 0:
-					if (isCaracteres(currentChar)) {
+					if (isChar(currentChar)) {
+						term += currentChar;
+						estado = 1;
+					} else if (isSpace(currentChar)) {
+						estado = 0;
+					} else if (isSpecial(currentChar)) {
 						term += currentChar;
 						token = new Token();
-						token.setType(Token.TK_CARACTER);
+						token.setType(Token.TK_SPECIAL);
 						token.setText(term);
 						token.setLine(line);
 						token.setColumn(column - term.length());
 						return token;
-					} else if (isChar(currentChar)) {
+					} else if (isPrivate(currentChar)) {
 						term += currentChar;
-						estado = 1;
-					} else if (isDigit(currentChar)) {
-						estado = 2;
+						estado = 5;
+					} else if (isConditional(currentChar)) {
 						term += currentChar;
-					} else if (isSpace(currentChar)) {
-						estado = 0;
-					} else if (isOperatorRela(currentChar)) {
-						estado = 3;
-						term += currentChar;
-					} else if(isOperatorAri(currentChar)){
+						token = new Token();
+						token.setType(Token.TK_IF_ELSE);
+						token.setText(term);
+						token.setLine(line);
+						token.setColumn(column - term.length());
+						return token;
+					} else if (isArithmeticOperator(currentChar)) {
+						if (currentChar == '=') {
+							term += currentChar;
+							estado = 3;
+							break;
+						}
 						term += currentChar;
 						token = new Token();
 						token.setType(Token.TK_OPERATORARI);
@@ -70,108 +86,236 @@ public class VexaScanner {
 						token.setLine(line);
 						token.setColumn(column - term.length());
 						return token;
-					} else if(isAspasD(currentChar)){
+					} else if (isLong(currentChar)) {
+						term += currentChar;
+						token = new Token();
+						token.setType(Token.TK_LONG);
+						token.setText(term);
+						token.setLine(line);
+						token.setColumn(column - term.length());
+						return token;
+					} else if (isPow(currentChar)) {
+						term += currentChar;
+						token = new Token();
+						token.setType(Token.TK_POW);
+						token.setText(term);
+						token.setLine(line);
+						token.setColumn(column - term.length());
+						return token;
+					} else if (isRelationalOperator(currentChar)) {
+						term += currentChar;
 						estado = 4;
+					} else if (currentChar == '!') {
 						term += currentChar;
-					} else if(isAspasS(currentChar)){
-						estado = 5;
+						estado = 8;
+					} else if (isDigit(currentChar)) {
 						term += currentChar;
+						estado = 9;
+					} else if (isBreak(currentChar)) {
+						term += currentChar;
+						token = new Token();
+						token.setType(Token.TK_BREAK);
+						token.setText(term);
+						token.setLine(line);
+						token.setColumn(column - term.length());
+						return token;
+					} else if (isComentInLine(currentChar)) {
+						term += currentChar;
+						estado = 11;
+					} else if (isComentVariousLines(currentChar)) {
+						term += currentChar;
+						estado = 12;
+					} else if (isCaracter(String.valueOf(currentChar))) {
+						term += currentChar;
+						estado = 13;
+					} else if (isFinal(currentChar)) {
+						term += currentChar;
+						token = new Token();
+						token.setType(Token.TK_FINAL);
+						token.setText(term);
+						token.setLine(line);
+						token.setColumn(column - term.length());
+						return token;
+
 					} else {
-						throw new VexaLexicalException("Simbolo incorreto Linha " + (line-1) + " Coluna " + column + "--->  '" + term + currentChar +"' ");
+						throw new VexaLexicalException("Simbolo mal construido");
 					}
 					break;
 				case 1:
-					if (isVar(term)) {
-						term += currentChar;
-						if (!isEndFile(currentChar))
-							back();
-						token = new Token();
-						token.setType(Token.TK_VAR);
-						token.setText(term);
-						token.setLine(line);
-						token.setColumn(column - term.length());
-						return token;
-					} else if (isChar(currentChar) || isDigit(currentChar)) {
+					if (isChar(currentChar) || isDigit(currentChar) || isUnderline(currentChar)) {
 						estado = 1;
 						term += currentChar;
-					} else if (isSpace(currentChar) || isEndFile(currentChar) || isParenthesesFuction(currentChar)) {
-						if (!isEndFile(currentChar) || isParenthesesFuction(currentChar))
-							back();
-						token = new Token();
-						token.setType(Token.TK_IDENTIFIER);
-						token.setText(term);
-						token.setLine(line);
-						token.setColumn(column - term.length());
-						return token;
+					} else if (isSpace(currentChar) || isArithmeticOperator(currentChar)) {
+						estado = 2;
 					} else {
-						throw new VexaLexicalException("Malformed Identifier");
+						throw new VexaLexicalException("Identificador mal formado");
 					}
 					break;
 				case 2:
-					if (isDigit(currentChar)) {
-						estado = 2;
+					token = new Token();
+					if (isReserved(term)) {
+						token.setType(Token.TK_RESERVED);
+					} else {
+						token.setType(Token.TK_IDENTIFIER);
+					}
+					token.setText(term);
+					token.setLine(line);
+					token.setColumn(column - term.length());
+					back();
+					return token;
+				case 3:
+					if (currentChar == '=') {
 						term += currentChar;
-					}else if(currentChar == '.') {
-						doubleBool = true;
-						estado = 2;
-						term += currentChar;
-					} else if (!isChar(currentChar) || isEndFile(currentChar)) {
-						if (!isEndFile(currentChar))
-							back();
 						token = new Token();
-						token.setType(doubleBool ? Token.TK_DOUBLE : Token.TK_NUMBER);
+						token.setType(Token.TK_OPERATORRELA);
+						token.setText(term);
+						token.setLine(line);
+						token.setColumn(column - term.length());
+
+						return token;
+					} else {
+						token = new Token();
+						token.setType(Token.TK_OPERATORARI);
+						token.setText(term);
+						token.setLine(line);
+						token.setColumn(column - term.length());
+						back();
+						return token;
+					}
+				case 4:
+					if (currentChar == '=') {
+						term += currentChar;
+						token = new Token();
+						token.setType(Token.TK_OPERATORARI);
 						token.setText(term);
 						token.setLine(line);
 						token.setColumn(column - term.length());
 						return token;
 					} else {
-						throw new VexaLexicalException("Erro: número float inválido Linha " + (line-1) + " Coluna " + column + "--->  '" + term + currentChar +"' ");
-					}
-					break;
-				case 3:
-					if (isOperatorAtri(currentChar)) {
-						term += currentChar;
-						if (!isEndFile(currentChar)) {
-							back();
-						}
 						token = new Token();
 						token.setType(Token.TK_OPERATORRELA);
 						token.setText(term);
 						token.setLine(line);
 						token.setColumn(column - term.length());
 						return token;
-					}else if(term.equals("=")  && (isSpace(currentChar) || isEndFile())){
-						if (!isEndFile(currentChar)) {
-							back();
-						}
-						token = new Token();
-						token.setType(Token.TK_OPERATORATRI);
-						token.setText(term);
-						token.setLine(line);
-						token.setColumn(column - term.length());
-						return token;
-					} else {
-						throw new VexaLexicalException("Error: Linha " + (line-1) + " Coluna " + column + "--->  '" + term + currentChar + "' ");
 					}
-					
-				case 4:
-					if (isAspasD(currentChar)) {
+				case 5:
+					if (isChar(currentChar)) {
 						term += currentChar;
-						token = new Token();
-						token.setType(Token.TK_STRING);
-						token.setText(term);
-						token.setLine(line);
-						token.setColumn(column - term.length());
-						return token;
-					}else if(isDigit(currentChar) || isChar(currentChar)){
-						estado = 4;
-						term += currentChar;
+						estado = 6;
 					} else {
-						throw new VexaLexicalException("Error Lexico: (String não fechada com aspas duplas) Linha " + (line-1) + " Coluna " + column + "--->  '" + term + currentChar + "' ");
+						throw new VexaLexicalException("Identificador PRIVADO mal formado");
 					}
 					break;
-				case 5:
-					if (isAspasS(currentChar)) {
+				case 6:
+					if (isChar(currentChar) || isDigit(currentChar)) {
+						estado = 6;
+						term += currentChar;
+					} else if (isSpace(currentChar) || isArithmeticOperator(currentChar)) {
+						estado = 7;
+					} else {
+						throw new VexaLexicalException("Identificador PRIVADO mal formado");
+					}
+					break;
+				case 7:
+					token = new Token();
+					token.setType(Token.TK_PRIVATE);
+					token.setText(term);
+					token.setLine(line);
+					token.setColumn(column - term.length());
+					back();
+					return token;
+				case 8:
+					if (currentChar == '=') {
+						term += currentChar;
+						token = new Token();
+						token.setType(Token.TK_OPERATORRELA);
+						token.setText(term);
+						token.setLine(line);
+						token.setColumn(column - term.length());
+						back();
+						return token;
+					} else {
+						throw new VexaLexicalException("Operador mal construido");
+					}
+				case 9:
+					if (isDigit(currentChar)) {
+						estado = 9;
+						term += currentChar;
+					} else if (!isChar(currentChar) && !isDot(currentChar)) {
+						token = new Token();
+						token.setType(Token.TK_NUMBER);
+						token.setText(term);
+						token.setLine(line);
+						token.setColumn(column - term.length());
+						back();
+						return token;
+					} else if (isDot(currentChar)) {
+						estado = 15;
+						term += currentChar;
+					} else {
+						throw new VexaLexicalException("Número Inteiro mal construido");
+					}
+					break;
+				case 10:
+					if (isDigit(currentChar)) {
+						estado = 10;
+						term += currentChar;
+					} else if (!isChar(currentChar)) {
+						token = new Token();
+						token.setType(Token.TK_FLOAT);
+						token.setText(term);
+						token.setLine(line);
+						token.setColumn(column - term.length());
+						return token;
+					} else {
+						throw new VexaLexicalException("Número Float mal construido");
+					}
+					break;
+				case 11:
+					if (isComentInLine(currentChar) || isDigit(currentChar) || isChar(currentChar)
+							|| isOperator(currentChar) || isPrivate(currentChar) || isConditional(currentChar)
+							|| isUnderline(currentChar)) {
+						estado = 11;
+						term += currentChar;
+					} else if (isSpace(currentChar)) {
+						token = new Token();
+						token.setType(Token.TK_COMMENT);
+						token.setText(term);
+						token.setLine(line);
+						token.setColumn(column - term.length());
+						return token;
+					} else {
+						throw new VexaLexicalException("Comentário de linha mal construido");
+					}
+					break;
+				case 12:
+					if (isSpace(currentChar) || isDigit(currentChar) || isChar(currentChar) || isOperator(currentChar)
+							|| isPrivate(currentChar) || isConditional(currentChar) || isUnderline(currentChar)) {
+						estado = 12;
+						term += currentChar;
+					} else if (isComentVariousLines(currentChar)) {
+						term += currentChar;
+						token = new Token();
+						token.setType(Token.TK_COMMENT);
+						token.setText(term);
+						token.setLine(line);
+						token.setColumn(column - term.length());
+						return token;
+					} else {
+						throw new VexaLexicalException("Comentário de Parágrafo mal construido");
+					}
+					break;
+				case 13:
+					if (isDigit(currentChar) || isChar(currentChar)) {
+						term += currentChar;
+						estado = 14;
+					} else {
+						throw new VexaLexicalException("Char mal construido");
+					}
+					break;
+				case 14:
+					if (isCaracter(String.valueOf(currentChar))) {
 						term += currentChar;
 						token = new Token();
 						token.setType(Token.TK_CHAR);
@@ -179,53 +323,31 @@ public class VexaScanner {
 						token.setLine(line);
 						token.setColumn(column - term.length());
 						return token;
-					}else if((isDigit(currentChar) || isChar(currentChar)) && !charAux){
-						estado = 5;
-						term += currentChar;
-						charAux = true;
 					} else {
-						throw new VexaLexicalException("Error Lexico: (Char invalido) Linha " + (line-1) + " Coluna " + column + "--->  '" + term + currentChar + "' ");
+						throw new VexaLexicalException("Char mal construido");
+					}
+				case 15:
+					if (isDigit(currentChar)) {
+						estado = 10;
+						term += currentChar;
+					} else {
+						throw new VexaLexicalException("Número Float mal construido");
 					}
 					break;
 			}
 		}
-
+		return token;
 	}
 
-	private boolean isVar(String var) { // Palavra reservada
-		String[] varAux = { "while", "int", "double", "float", "main", "if", "else" };
-		return Arrays.stream(varAux).anyMatch(var::equals);
-	}
-
-	private boolean isCaracteres(char c) { // Caracter Especial
-		return c == ')' || c == '(' || c == '{' || c == '}' || c == ';' || c == ':' || c == ';' || c == ',';
-	}
-
-	private boolean isDigit(char c) { // Digito
+	private boolean isDigit(char c) {
 		return c >= '0' && c <= '9';
 	}
 
-	private boolean isChar(char c) { // Letra
-		return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+	private boolean isChar(char c) {
+		return (c >= 'a' && c <= 'z');
 	}
 
-	private boolean isOperatorRela(char c) { // Operador Relacional
-		return c == '>' || c == '<' || c == '=';
-	}
-
-	private boolean isOperatorAri(char c) { // Operador aritmético
-		return c == '+' || c == '-' || c == '*' || c == '/' || c == '%';
-	}
-
-	private boolean isOperatorAtri(char c) { // Operador atribuição
-		return c == '=';
-	}
-
-	private boolean isParenthesesFuction(char c) { // Abrir function
-		return c == '(';
-	}
-
-	private boolean isSpace(char c) { // Espaço em branco
+	private boolean isSpace(char c) {
 		if (c == '\n' || c == '\r') {
 			line++;
 			column = 0;
@@ -233,32 +355,88 @@ public class VexaScanner {
 		return c == ' ' || c == '\t' || c == '\n' || c == '\r';
 	}
 
-	private boolean isAspasD(char c) { // Aspas simples
-		return c == '"' ;
+	private boolean isReserved(String c) {
+		if (c.compareTo("main") == 0 || c.compareTo("if") == 0 || c.compareTo("else") == 0 || c.compareTo("while") == 0
+				|| c.compareTo("do") == 0 || c.compareTo("for") == 0 || c.compareTo("int") == 0
+				|| c.compareTo("float") == 0 || c.compareTo("char") == 0 || c.compareTo("Vexamirim") == 0
+				|| c.compareTo("charrete") == 0) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
-	private boolean isAspasS(char c) { // Aspas Duplas
-		return c == '\'' ;
+	private boolean isSpecial(char c) {
+		return c == ')' || c == '(' || c == '{' || c == '}' || c == ',' || c == ';';
+	}
+
+	private boolean isPrivate(char c) {
+		return c == '#';
+	}
+
+	private boolean isConditional(char c) {
+		return c == '?' || c == ':';
+	}
+
+	private boolean isArithmeticOperator(char c) {
+		return c == '+' || c == '-' || c == '=' || c == '*' || c == '/';
+	}
+
+	private boolean isRelationalOperator(char c) {
+		return c == '>' || c == '<';
+	}
+
+	private boolean isLong(char c) {
+		return c == '@';
+	}
+
+	private boolean isPow(char c) {
+		return c == '^';
+
+	}
+
+	private boolean isComentInLine(char c) {
+		return c == '`';
+	}
+
+	private boolean isComentVariousLines(char c) {
+		return (c == '~');
+	}
+
+	private boolean isOperator(char c) {
+		return c == '>' || c == '<' || c == '=' || c == '!';
+	}
+
+	private boolean isCaracter(String c) {
+		return (c.compareTo("'") == 0);
+	}
+
+	private boolean isUnderline(char c) {
+		return c == '_';
+	}
+
+	private boolean isFinal(char c) {
+		return c == '$';
+	}
+
+	private boolean isDot(char c) {
+		return c == '.';
+	}
+
+	private boolean isBreak(char c) {
+		return c == '&';
 	}
 
 	private char nextChar() {
-		if (isEndFile()) {
-			return '\0';
-		}
 		return content[pos++];
 	}
 
-	private boolean isEndFile() {
-		return pos >= content.length;
-	}
-
-	private boolean isEndFile(char c) {
-		return c == '\0';
-	}
-
-	private void back() {
+	public void back() {
 		pos--;
-		column--;
+	}
+
+	private boolean isEOF() {
+		return pos == content.length;
 	}
 
 }

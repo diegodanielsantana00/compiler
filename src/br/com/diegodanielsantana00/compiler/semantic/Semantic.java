@@ -1,30 +1,24 @@
 package br.com.diegodanielsantana00.compiler.semantic;
 
 public class Semantic {
-    private String nome;
-    private String tipo;
+    private String type;
+    private String name;
     private int escopo;
 
-    public Semantic() {
-        this.nome = "";
-        this.tipo = "";
-        this.escopo = 0;
+    public String getName() {
+        return name;
     }
 
-    public String getNome() {
-        return nome;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public String getType() {
+        return type;
     }
 
-    public String getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
+    public void setType(String type) {
+        this.type = type;
     }
 
     public int getEscopo() {
@@ -34,4 +28,5 @@ public class Semantic {
     public void setEscopo(int escopo) {
         this.escopo = escopo;
     }
+
 }
