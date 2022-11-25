@@ -38,26 +38,26 @@ public class VexaParser {
     private void checkINT() {
         token = scanner.nextToken();
         if (token.getType() != Token.TK_RESERVED || token.getText().compareTo("int") != 0) {
-            throw new VexaSyntaxException("INT expected!, found " + Token.TK_TEXT[token.getType()] + " ("
-                    + token.getText() + ") at Line " + token.getLine() + " and column " + token.getColumn());
+            throw new VexaSyntaxException("INT incorreto!, encontrado a inconsistência " + Token.TK_TEXT[token.getType()] + " ("
+                    + token.getText() + ") na linha " + token.getLine() + " e coluna " + token.getColumn());
         }
     }
 
     private void checkMain() {
         token = scanner.nextToken();
         if (token.getType() != Token.TK_RESERVED || token.getText().compareTo("main") != 0) {
-            throw new VexaSyntaxException("MAIN expected!, found " + Token.TK_TEXT[token.getType()] + " ("
-                    + token.getText() + ") at Line " + token.getLine() + " and column " + token.getColumn());
+            throw new VexaSyntaxException("MAIN incorreto!, encontrado a inconsistência " + Token.TK_TEXT[token.getType()] + " ("
+                    + token.getText() + ") na linha " + token.getLine() + " e coluna " + token.getColumn());
         }
     }
 
     private void bloco() {
-        startKey(); 
+        startKey();
         contadorEscopo++;
         startKey();
         declaracaoVar();
         endKey();
-        comando();
+        command();
         endKey();
         contadorEscopo--;
     }
@@ -69,7 +69,7 @@ public class VexaParser {
         semicolon();
         Semantic[contadorSemantic].setEscopo(contadorEscopo);
         contadorSemantic++;
-        declarationVarLoop(); 
+        declarationVarLoop();
     }
 
     private void declarationVarLoop() {
@@ -78,7 +78,7 @@ public class VexaParser {
                 || token.getText().compareTo("float") == 0 || token.getText().compareTo("char") == 0)) {
             Semantic[contadorSemantic] = new Semantic();
             Semantic[contadorSemantic].setType(token.getText());
-            identifier(); 
+            identifier();
             semicolon();
             Semantic[contadorSemantic].setEscopo(contadorEscopo);
             contadorSemantic++;
@@ -104,8 +104,8 @@ public class VexaParser {
         token = scanner.nextToken();
         if (token.getType() != Token.TK_RESERVED || (token.getText().compareTo("int") != 0
                 && token.getText().compareTo("float") != 0 && token.getText().compareTo("char") != 0)) {
-            throw new VexaSyntaxException("INT OR FLOAT or CHAR expected!, found " + Token.TK_TEXT[token.getType()]
-                    + " (" + token.getText() + ") at Line " + token.getLine() + " and column " + token.getColumn());
+            throw new VexaSyntaxException("INT ou FLOAT ou CHAR incorreto!, encontrado a inconsistência " + Token.TK_TEXT[token.getType()]
+                    + " (" + token.getText() + ") na linha " + token.getLine() + " e coluna " + token.getColumn());
         }
         Semantic[contadorSemantic].setType(token.getText());
     }
@@ -113,11 +113,11 @@ public class VexaParser {
     private void identifier() {
         token = scanner.nextToken();
         if (token.getType() != Token.TK_IDENTIFIER) {
-            throw new VexaSyntaxException("IDENTIFIER expected!, found " + Token.TK_TEXT[token.getType()] + " ("
-                    + token.getText() + ") at Line " + token.getLine() + " and column " + token.getColumn());
+            throw new VexaSyntaxException("IDENTIFIER incorreto!, encontrado a inconsistência " + Token.TK_TEXT[token.getType()] + " ("
+                    + token.getText() + ") na linha " + token.getLine() + " e coluna " + token.getColumn());
         }
         if (isExists(token.getText())) {
-            throw new VexaSemanticException("Variable " + token.getText() + " already exists.");
+            throw new VexaSemanticException("Variavel " + token.getText() + " já existe.");
         }
         Semantic[contadorSemantic].setName(token.getText());
     }
@@ -164,24 +164,26 @@ public class VexaParser {
     private void checkAritmetica() {
         for (int i = 1; i < contadorAritmetico; i++) {
             if (isInt[i - 1] != isInt[i]) {
-                throw new VexaSemanticException("Variable type is not supported for arithmetic expression.");
+                throw new VexaSemanticException("O tipo da variável não é suportado para expressão aritmética");
             }
         }
 
-        if(varAtribui != null) {
-            for(int i = 0; i < contadorSemantic; i++) {
-                if(Semantic[i].getName().compareTo(varAtribui) == 0 && Semantic[i].getEscopo() == contadorEscopo) {
+        if (varAtribui != null) {
+            for (int i = 0; i < contadorSemantic; i++) {
+                if (Semantic[i].getName().compareTo(varAtribui) == 0 && Semantic[i].getEscopo() == contadorEscopo) {
                     varAtribui = Semantic[i].getType();
                 }
             }
             for (int i = 1; i < contadorAritmetico; i++) {
-                if(varAtribui.compareTo("int") == 0) {
-                    if(isInt[i] == false) {
-                        throw new VexaSemanticException("Variable type int is not supported for arithmetic expression float.");
+                if (varAtribui.compareTo("int") == 0) {
+                    if (isInt[i] == false) {
+                        throw new VexaSemanticException(
+                                "O tipo da variavel não é suportado para float");
                     }
                 } else {
-                    if(isInt[i] == true) {
-                        throw new VexaSemanticException("Variable type float is not supported for arithmetic expression int.");
+                    if (isInt[i] == true) {
+                        throw new VexaSemanticException(
+                                "o tipo da variavel não é suportado para int");
                     }
                 }
             }
@@ -193,16 +195,18 @@ public class VexaParser {
     private void atribui() {
         token = scanner.nextToken();
         if (token.getType() != Token.TK_OPERATORARI) {
-            throw new VexaSyntaxException("= expected!, found " + Token.TK_TEXT[token.getType()] + " (" + token.getText()
-                    + ") at Line " + token.getLine() + " and column " + token.getColumn());
+            throw new VexaSyntaxException(
+                    "'=' incorreto!, encontrado a inconsistência " + Token.TK_TEXT[token.getType()] + " (" + token.getText()
+                            + ") na linha " + token.getLine() + " e coluna " + token.getColumn());
         }
     }
 
     private void semicolon() {
         token = scanner.nextToken();
         if (token.getType() != Token.TK_SPECIAL) {
-            throw new VexaSyntaxException("; expected!, found " + Token.TK_TEXT[token.getType()] + " (" + token.getText()
-                    + ") at Line " + token.getLine() + " and column " + token.getColumn());
+            throw new VexaSyntaxException(
+                    "';' incorreto!, encontrado a inconsistência " + Token.TK_TEXT[token.getType()] + " (" + token.getText()
+                            + ") na linha " + token.getLine() + " e coluna " + token.getColumn());
         }
     }
 
@@ -210,8 +214,8 @@ public class VexaParser {
         token = scanner.nextToken();
         if (token.getType() != Token.TK_IDENTIFIER && token.getType() != Token.TK_NUMBER
                 && token.getType() != Token.TK_FLOAT) {
-            throw new VexaSyntaxException("ID or NUMBER expected!, found " + Token.TK_TEXT[token.getType()] + " ("
-                    + token.getText() + ") at Line " + token.getLine() + " and column " + token.getColumn());
+            throw new VexaSyntaxException("VARIAVEL RESERVADA ou NUMBER incorreto!, encontrado a inconsistência " + Token.TK_TEXT[token.getType()] + " ("
+                    + token.getText() + ") na linha " + token.getLine() + " e coluna " + token.getColumn());
         }
 
         if (token.getType() == Token.TK_NUMBER) {
@@ -223,24 +227,17 @@ public class VexaParser {
         }
     }
 
-    private void operadorAritmetico() {
-        if (token.getType() != Token.TK_OPERATORARI) {
-            throw new VexaSyntaxException("Operator Expected!, found " + Token.TK_TEXT[token.getType()] + " ("
-                    + token.getText() + ") at Line " + token.getLine() + " and column " + token.getColumn());
-        }
-    }
-
-    private void comando() {
+    private void command() {
         token = scanner.nextToken();
         if (token.getType() == Token.TK_RESERVED && token.getText().compareTo("if") == 0) { // IF ELSE
             startParmns();
             relacional();
             endParmns();
-            comando();
-            comandoElse();
+            command();
+            commandElse();
         } else if (token.getType() == Token.TK_IDENTIFIER) {
             if (!isExists(token.getText())) {
-                throw new VexaSemanticException("Variable " + token.getText() + " doesn't exists.");
+                throw new VexaSemanticException("Variavel " + token.getText() + " não existe");
             }
             verificaAtribuicao(token.getText());
             varAtribui = token.getText();
@@ -259,7 +256,7 @@ public class VexaParser {
         for (int i = 0; i < contadorSemantic; i++) {
             if (Semantic[i].getName().compareTo(nome) == 0 && Semantic[i].getEscopo() == contadorEscopo) {
                 if (Semantic[i].getType().compareTo("char") == 0) {
-                    throw new VexaSemanticException("Variable type " + token.getText() + " is not compatible.");
+                    throw new VexaSemanticException("Variavel do tipo " + token.getText() + " não é compativel");
                 }
             }
         }
@@ -268,40 +265,39 @@ public class VexaParser {
     private void palavraElse() {
         token = scanner.nextToken();
         if (token.getType() != Token.TK_RESERVED || token.getText().compareTo("else") != 0) {
-            throw new VexaSyntaxException("ELSE expected!, found " + Token.TK_TEXT[token.getType()] + " ("
-                    + token.getText() + ") at Line " + token.getLine() + " and column " + token.getColumn());
+            throw new VexaSyntaxException("ELSE incorreto!, encontrado a inconsistência " + Token.TK_TEXT[token.getType()] + " ("
+                    + token.getText() + ") na linha " + token.getLine() + " e coluna " + token.getColumn());
         }
     }
 
     private void startParmns() {
         token = scanner.nextToken();
         if (token.getType() != Token.TK_SPECIAL || token.getText().compareTo("(") != 0) {
-            throw new VexaSyntaxException("Caracter Special expected!, found " + Token.TK_TEXT[token.getType()] + " ("
-                    + token.getText() + ") at Line " + token.getLine() + " and column " + token.getColumn());
-        }
-    }
-
-    private void endParmns() {
-        token = scanner.nextToken();
-        if (token.getType() != Token.TK_SPECIAL || token.getText().compareTo(")") != 0) {
-            throw new VexaSyntaxException("Caracter Special expected!, found " + Token.TK_TEXT[token.getType()] + " ("
-                    + token.getText() + ") at Line " + token.getLine() + " and column " + token.getColumn());
+            throw new VexaSyntaxException("Caracter Special incorreto!, encontrado a inconsistência " + Token.TK_TEXT[token.getType()] + " ("
+                    + token.getText() + ") na linha " + token.getLine() + " e coluna " + token.getColumn());
         }
     }
 
     private void startKey() {
         token = scanner.nextToken();
         if (token.getType() != Token.TK_SPECIAL || token.getText().compareTo("{") != 0) {
-            throw new VexaSyntaxException("Caracter Special expected!, found " + Token.TK_TEXT[token.getType()] + " ("
-                    + token.getText() + ") at Line " + token.getLine() + " and column " + token.getColumn());
+            throw new VexaSyntaxException("Caracter Special incorreto!, encontrado a inconsistência " + Token.TK_TEXT[token.getType()] + " ("
+                    + token.getText() + ") na linha " + token.getLine() + " e coluna " + token.getColumn());
         }
     }
 
     private void endKey() {
         token = scanner.nextToken();
         if (token.getType() != Token.TK_SPECIAL || token.getText().compareTo("}") != 0) {
-            throw new VexaSyntaxException("Caracter Special expected!, found " + Token.TK_TEXT[token.getType()] + " ("
-                    + token.getText() + ") at Line " + token.getLine() + " and column " + token.getColumn());
+            throw new VexaSyntaxException("Caracter Special incorreto!, encontrado a inconsistência " + Token.TK_TEXT[token.getType()] + " ("
+                    + token.getText() + ") na linha " + token.getLine() + " e coluna " + token.getColumn());
+        }
+    }
+
+    private void operadorAritmetico() {
+        if (token.getType() != Token.TK_OPERATORARI) {
+            throw new VexaSyntaxException("Operator incorreto!, encontrado a inconsistência " + Token.TK_TEXT[token.getType()] + " ("
+                    + token.getText() + ") na linha " + token.getLine() + " e coluna " + token.getColumn());
         }
     }
 
@@ -313,19 +309,28 @@ public class VexaParser {
 
     private void operadorRelacional() {
         if (token.getType() != Token.TK_OPERATORRELA) {
-            throw new VexaSyntaxException("Operator Relational expected!, found " + Token.TK_TEXT[token.getType()] + " ("
-                    + token.getText() + ") at Line " + token.getLine() + " and column " + token.getColumn());
+            throw new VexaSyntaxException(
+                    "Operador Relacional!, encontrado a inconsistência " + Token.TK_TEXT[token.getType()] + " ("
+                            + token.getText() + ") na linha " + token.getLine() + " e coluna " + token.getColumn());
         }
     }
 
-    private void comandoElse() {
+    private void commandElse() {
         token = scanner.nextToken();
         if (token.getType() == Token.TK_SPECIAL && token.getText().compareTo("{") == 0) {
             palavraElse();
-            comando();
+            command();
             endKey();
         } else {
             scanner.back();
+        }
+    }
+
+    private void endParmns() {
+        token = scanner.nextToken();
+        if (token.getType() != Token.TK_SPECIAL || token.getText().compareTo(")") != 0) {
+            throw new VexaSyntaxException("Caracter Special incorreto!, encontrado a inconsistência " + Token.TK_TEXT[token.getType()] + " ("
+                    + token.getText() + ") na linha " + token.getLine() + " e coluna " + token.getColumn());
         }
     }
 
@@ -333,6 +338,6 @@ public class VexaParser {
         startParmns();
         relacional();
         endParmns();
-        comando();
+        command();
     }
 }

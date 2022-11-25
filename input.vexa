@@ -1,12 +1,9 @@
 int main () {
-     { int ab1 ; }
-      { { float ab1 ; }
+     { int teste ; }
+      { { float teste ; float teste ; }
        if ( 1 +  1 > 2 + 2 )
-        ab1 = 1.1 + 1.2 ;
-        
-         { else while ( 1 + 1 > 2 + 2 ) ab1 = 1.4 + 1.1 ; } 
-     
+        teste = 1.1 + 1.2 ;
+         { else while ( 1 + 1 > 2 + 2 ) teste = 1.4 + 1.1 ; } 
      } 
-     
     }
 $

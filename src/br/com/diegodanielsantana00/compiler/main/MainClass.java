@@ -9,10 +9,11 @@ import br.com.diegodanielsantana00.compiler.syntax.VexaParser;
 public class MainClass {
     public static void main(String[] args) {
         try {
-            VexaScanner scanner = new VexaScanner("/Users/diegodaniel/Documents/Compiler/input.vexa");
+            boolean debugVarPrint = false; // Variavel para printar os tokens da analise lexica.
+            VexaScanner scanner = new VexaScanner("/Users/diegodaniel/Documents/Compiler/input.vexa", debugVarPrint);
             VexaParser parser = new VexaParser(scanner);
-
             parser.start();
+
             System.out.println("Compilado com sucesso");
         } catch (VexaLexicalException ex) {
             System.err.println("Erro Léxico: " + ex.getMessage());
@@ -21,7 +22,7 @@ public class MainClass {
         } catch (VexaSemanticException ex) {
             System.out.println("Erro Semântico: " + ex.getMessage());
         } catch (Exception ex) {
-            System.err.println("Erro Genérico: " + ex.getMessage());
+            System.err.println("Erro Java: " + ex.getMessage());
         }
     }
 }

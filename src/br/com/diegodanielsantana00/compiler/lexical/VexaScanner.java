@@ -9,22 +9,25 @@ import br.com.diegodanielsantana00.compiler.exceptions.VexaLexicalException;
 public class VexaScanner {
 
 	private char[] content;
-	private int estado;
+	private int state;
 	private int pos;
-
+	private boolean debugVar;
 	private int line;
 	private int column;
 
-	public VexaScanner(String filename) {
+	public VexaScanner(String filename, boolean debugVar) {
 		try {
-			line = 1;
+			this.debugVar = debugVar;
 			column = 0;
-			String txtConteudo;
-			txtConteudo = new String(Files.readAllBytes(Paths.get(filename)), StandardCharsets.UTF_8);
-			System.out.println("--- INPUT ---");
-			System.out.println(txtConteudo);
-			System.out.println("-------------");
-			content = txtConteudo.toCharArray();
+			line = 1;
+			String auxCode = "";
+			auxCode = new String(Files.readAllBytes(Paths.get(filename)), StandardCharsets.UTF_8);
+			if (this.debugVar) {
+				System.out.println("-- ENTRADA --");
+				System.out.println(auxCode);
+				System.out.println("-------------");
+			}
+			content = auxCode.toCharArray();
 			pos = 0;
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -39,7 +42,7 @@ public class VexaScanner {
 			return null;
 		}
 
-		estado = 0;
+		state = 0;
 		while (pos < content.length) {
 			if (isEOF()) {
 				return null;
@@ -47,13 +50,13 @@ public class VexaScanner {
 			currentChar = nextChar();
 			column++;
 
-			switch (estado) {
+			switch (state) {
 				case 0:
 					if (isChar(currentChar)) {
 						term += currentChar;
-						estado = 1;
+						state = 1;
 					} else if (isSpace(currentChar)) {
-						estado = 0;
+						state = 0;
 					} else if (isSpecial(currentChar)) {
 						term += currentChar;
 						token = new Token();
@@ -61,10 +64,16 @@ public class VexaScanner {
 						token.setText(term);
 						token.setLine(line);
 						token.setColumn(column - term.length());
+						if (debugVar) {
+							System.out.println(token.toString());
+						}
+						if (debugVar) {
+							System.out.println(token.toString());
+						}
 						return token;
 					} else if (isPrivate(currentChar)) {
 						term += currentChar;
-						estado = 5;
+						state = 5;
 					} else if (isConditional(currentChar)) {
 						term += currentChar;
 						token = new Token();
@@ -72,11 +81,14 @@ public class VexaScanner {
 						token.setText(term);
 						token.setLine(line);
 						token.setColumn(column - term.length());
+						if (debugVar) {
+							System.out.println(token.toString());
+						}
 						return token;
 					} else if (isArithmeticOperator(currentChar)) {
 						if (currentChar == '=') {
 							term += currentChar;
-							estado = 3;
+							state = 3;
 							break;
 						}
 						term += currentChar;
@@ -85,6 +97,9 @@ public class VexaScanner {
 						token.setText(term);
 						token.setLine(line);
 						token.setColumn(column - term.length());
+						if (debugVar) {
+							System.out.println(token.toString());
+						}
 						return token;
 					} else if (isLong(currentChar)) {
 						term += currentChar;
@@ -93,6 +108,9 @@ public class VexaScanner {
 						token.setText(term);
 						token.setLine(line);
 						token.setColumn(column - term.length());
+						if (debugVar) {
+							System.out.println(token.toString());
+						}
 						return token;
 					} else if (isPow(currentChar)) {
 						term += currentChar;
@@ -101,16 +119,19 @@ public class VexaScanner {
 						token.setText(term);
 						token.setLine(line);
 						token.setColumn(column - term.length());
+						if (debugVar) {
+							System.out.println(token.toString());
+						}
 						return token;
 					} else if (isRelationalOperator(currentChar)) {
 						term += currentChar;
-						estado = 4;
+						state = 4;
 					} else if (currentChar == '!') {
 						term += currentChar;
-						estado = 8;
+						state = 8;
 					} else if (isDigit(currentChar)) {
 						term += currentChar;
-						estado = 9;
+						state = 9;
 					} else if (isBreak(currentChar)) {
 						term += currentChar;
 						token = new Token();
@@ -118,16 +139,19 @@ public class VexaScanner {
 						token.setText(term);
 						token.setLine(line);
 						token.setColumn(column - term.length());
+						if (debugVar) {
+							System.out.println(token.toString());
+						}
 						return token;
 					} else if (isComentInLine(currentChar)) {
 						term += currentChar;
-						estado = 11;
+						state = 11;
 					} else if (isComentVariousLines(currentChar)) {
 						term += currentChar;
-						estado = 12;
+						state = 12;
 					} else if (isCaracter(String.valueOf(currentChar))) {
 						term += currentChar;
-						estado = 13;
+						state = 13;
 					} else if (isFinal(currentChar)) {
 						term += currentChar;
 						token = new Token();
@@ -135,6 +159,9 @@ public class VexaScanner {
 						token.setText(term);
 						token.setLine(line);
 						token.setColumn(column - term.length());
+						if (debugVar) {
+							System.out.println(token.toString());
+						}
 						return token;
 
 					} else {
@@ -143,10 +170,10 @@ public class VexaScanner {
 					break;
 				case 1:
 					if (isChar(currentChar) || isDigit(currentChar) || isUnderline(currentChar)) {
-						estado = 1;
+						state = 1;
 						term += currentChar;
 					} else if (isSpace(currentChar) || isArithmeticOperator(currentChar)) {
-						estado = 2;
+						state = 2;
 					} else {
 						throw new VexaLexicalException("Identificador mal formado");
 					}
@@ -162,6 +189,9 @@ public class VexaScanner {
 					token.setLine(line);
 					token.setColumn(column - term.length());
 					back();
+					if (debugVar) {
+						System.out.println(token.toString());
+					}
 					return token;
 				case 3:
 					if (currentChar == '=') {
@@ -172,6 +202,9 @@ public class VexaScanner {
 						token.setLine(line);
 						token.setColumn(column - term.length());
 
+						if (debugVar) {
+							System.out.println(token.toString());
+						}
 						return token;
 					} else {
 						token = new Token();
@@ -180,6 +213,9 @@ public class VexaScanner {
 						token.setLine(line);
 						token.setColumn(column - term.length());
 						back();
+						if (debugVar) {
+							System.out.println(token.toString());
+						}
 						return token;
 					}
 				case 4:
@@ -190,6 +226,9 @@ public class VexaScanner {
 						token.setText(term);
 						token.setLine(line);
 						token.setColumn(column - term.length());
+						if (debugVar) {
+							System.out.println(token.toString());
+						}
 						return token;
 					} else {
 						token = new Token();
@@ -197,22 +236,25 @@ public class VexaScanner {
 						token.setText(term);
 						token.setLine(line);
 						token.setColumn(column - term.length());
+						if (debugVar) {
+							System.out.println(token.toString());
+						}
 						return token;
 					}
 				case 5:
 					if (isChar(currentChar)) {
 						term += currentChar;
-						estado = 6;
+						state = 6;
 					} else {
 						throw new VexaLexicalException("Identificador PRIVADO mal formado");
 					}
 					break;
 				case 6:
 					if (isChar(currentChar) || isDigit(currentChar)) {
-						estado = 6;
+						state = 6;
 						term += currentChar;
 					} else if (isSpace(currentChar) || isArithmeticOperator(currentChar)) {
-						estado = 7;
+						state = 7;
 					} else {
 						throw new VexaLexicalException("Identificador PRIVADO mal formado");
 					}
@@ -224,6 +266,9 @@ public class VexaScanner {
 					token.setLine(line);
 					token.setColumn(column - term.length());
 					back();
+					if (debugVar) {
+						System.out.println(token.toString());
+					}
 					return token;
 				case 8:
 					if (currentChar == '=') {
@@ -234,13 +279,16 @@ public class VexaScanner {
 						token.setLine(line);
 						token.setColumn(column - term.length());
 						back();
+						if (debugVar) {
+							System.out.println(token.toString());
+						}
 						return token;
 					} else {
 						throw new VexaLexicalException("Operador mal construido");
 					}
 				case 9:
 					if (isDigit(currentChar)) {
-						estado = 9;
+						state = 9;
 						term += currentChar;
 					} else if (!isChar(currentChar) && !isDot(currentChar)) {
 						token = new Token();
@@ -249,9 +297,12 @@ public class VexaScanner {
 						token.setLine(line);
 						token.setColumn(column - term.length());
 						back();
+						if (debugVar) {
+							System.out.println(token.toString());
+						}
 						return token;
 					} else if (isDot(currentChar)) {
-						estado = 15;
+						state = 15;
 						term += currentChar;
 					} else {
 						throw new VexaLexicalException("Número Inteiro mal construido");
@@ -259,7 +310,7 @@ public class VexaScanner {
 					break;
 				case 10:
 					if (isDigit(currentChar)) {
-						estado = 10;
+						state = 10;
 						term += currentChar;
 					} else if (!isChar(currentChar)) {
 						token = new Token();
@@ -267,6 +318,9 @@ public class VexaScanner {
 						token.setText(term);
 						token.setLine(line);
 						token.setColumn(column - term.length());
+						if (debugVar) {
+							System.out.println(token.toString());
+						}
 						return token;
 					} else {
 						throw new VexaLexicalException("Número Float mal construido");
@@ -276,7 +330,7 @@ public class VexaScanner {
 					if (isComentInLine(currentChar) || isDigit(currentChar) || isChar(currentChar)
 							|| isOperator(currentChar) || isPrivate(currentChar) || isConditional(currentChar)
 							|| isUnderline(currentChar)) {
-						estado = 11;
+						state = 11;
 						term += currentChar;
 					} else if (isSpace(currentChar)) {
 						token = new Token();
@@ -284,6 +338,9 @@ public class VexaScanner {
 						token.setText(term);
 						token.setLine(line);
 						token.setColumn(column - term.length());
+						if (debugVar) {
+							System.out.println(token.toString());
+						}
 						return token;
 					} else {
 						throw new VexaLexicalException("Comentário de linha mal construido");
@@ -292,7 +349,7 @@ public class VexaScanner {
 				case 12:
 					if (isSpace(currentChar) || isDigit(currentChar) || isChar(currentChar) || isOperator(currentChar)
 							|| isPrivate(currentChar) || isConditional(currentChar) || isUnderline(currentChar)) {
-						estado = 12;
+						state = 12;
 						term += currentChar;
 					} else if (isComentVariousLines(currentChar)) {
 						term += currentChar;
@@ -301,6 +358,9 @@ public class VexaScanner {
 						token.setText(term);
 						token.setLine(line);
 						token.setColumn(column - term.length());
+						if (debugVar) {
+							System.out.println(token.toString());
+						}
 						return token;
 					} else {
 						throw new VexaLexicalException("Comentário de Parágrafo mal construido");
@@ -309,7 +369,7 @@ public class VexaScanner {
 				case 13:
 					if (isDigit(currentChar) || isChar(currentChar)) {
 						term += currentChar;
-						estado = 14;
+						state = 14;
 					} else {
 						throw new VexaLexicalException("Char mal construido");
 					}
@@ -322,13 +382,16 @@ public class VexaScanner {
 						token.setText(term);
 						token.setLine(line);
 						token.setColumn(column - term.length());
+						if (debugVar) {
+							System.out.println(token.toString());
+						}
 						return token;
 					} else {
 						throw new VexaLexicalException("Char mal construido");
 					}
 				case 15:
 					if (isDigit(currentChar)) {
-						estado = 10;
+						state = 10;
 						term += currentChar;
 					} else {
 						throw new VexaLexicalException("Número Float mal construido");
