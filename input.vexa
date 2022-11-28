@@ -1,9 +1,7 @@
 int main () {
-     { int teste ; }
-      { { float teste ; float teste ; }
-       if ( 1 +  1 > 2 + 2 )
-        teste = 1.1 + 1.2 ;
-         { else while ( 1 + 1 > 2 + 2 ) teste = 1.4 + 1.1 ; } 
-     } 
-    }
+    int resposta = 0;
+    double teste = 0.0 ;
+    char testeu = 'd';
+    float teste9 = 1.0 ;
+ }
 $
