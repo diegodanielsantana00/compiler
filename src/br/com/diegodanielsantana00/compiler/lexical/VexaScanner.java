@@ -174,8 +174,16 @@ public class VexaScanner {
 						term += currentChar;
 					} else if (isSpace(currentChar) || isArithmeticOperator(currentChar)) {
 						state = 2;
+					} else if (isPontoVirgula(currentChar)) {
+						token = new Token();
+						token.setType(Token.TK_IDENTIFIER);
+						token.setText(term);
+						token.setLine(line);
+						token.setColumn(column - term.length());
+						back();
+						return token;
 					} else {
-						throw new VexaLexicalException("Identificador mal formado");
+						throw new VexaLexicalException("Identificador mal formado '" + currentChar + "'");
 					}
 					break;
 				case 2:
@@ -435,6 +443,10 @@ public class VexaScanner {
 
 	private boolean isPrivate(char c) {
 		return c == '#';
+	}
+
+	private boolean isPontoVirgula(char c) {
+		return c == ';';
 	}
 
 	private boolean isConditional(char c) {

@@ -230,21 +230,23 @@ public class VexaParser {
                     if (token.getType() == Token.TK_OPERATORARI) {
                         token = scanner.nextToken();
                         if (token.getType() == Token.TK_FLOAT || token.getType() == Token.TK_NUMBER
-                        || token.getType() == Token.TK_DOUBLE || token.getType() == Token.TK_CHAR) {
+                                || token.getType() == Token.TK_DOUBLE || token.getType() == Token.TK_CHAR) {
                             token = scanner.nextToken();
                             if (token.getType() == Token.TK_SPECIAL) {
-                                
-                            }else{
+
+                            } else {
                                 throw new VexaSyntaxException(
-                            "requer um ';'!, encontrado a inconsistência " + Token.TK_TEXT[token.getType()] + " ("
-                                    + token.getText()
-                                    + ") na linha " + token.getLine() + " e coluna " + token.getColumn());
+                                        "requer um ';'!, encontrado a inconsistência " + Token.TK_TEXT[token.getType()]
+                                                + " ("
+                                                + token.getText()
+                                                + ") na linha " + token.getLine() + " e coluna " + token.getColumn());
                             }
-                        }else{
+                        } else {
                             throw new VexaSyntaxException(
-                            "requer um ';'!, encontrado a inconsistência " + Token.TK_TEXT[token.getType()] + " ("
-                                    + token.getText()
-                                    + ") na linha " + token.getLine() + " e coluna " + token.getColumn());
+                                    "requer um ';'!, encontrado a inconsistência " + Token.TK_TEXT[token.getType()]
+                                            + " ("
+                                            + token.getText()
+                                            + ") na linha " + token.getLine() + " e coluna " + token.getColumn());
                         }
                     }
                 } else {
@@ -259,19 +261,12 @@ public class VexaParser {
                                 + token.getText()
                                 + ") na linha " + token.getLine() + " e coluna " + token.getColumn());
             }
-        } else if (token.getType() == Token.TK_SPECIAL) {
+        } else if (token.getType() != Token.TK_SPECIAL) {
             throw new VexaSyntaxException(
                     "';' incorreto!, encontrado a inconsistência " + Token.TK_TEXT[token.getType()] + " ("
                             + token.getText()
                             + ") na linha " + token.getLine() + " e coluna " + token.getColumn());
         }
-        // if (token.getType() == Token.TK_SPECIAL) {
-        // throw new VexaSyntaxException(
-        // "';' incorreto!, encontrado a inconsistência " +
-        // Token.TK_TEXT[token.getType()] + " ("
-        // + token.getText()
-        // + ") na linha " + token.getLine() + " e coluna " + token.getColumn());
-        // }
     }
 
     private void numAritmetica() {

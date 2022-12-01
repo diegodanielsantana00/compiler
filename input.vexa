@@ -1,7 +1,10 @@
-int main () {
-    int resposta = 0;
-    double teste = 0.0 ;
-    char testeu = 'd';
-    float teste9 = 1.0 ;
- }
+int main (){
+	int a;
+	float b;	
+	if (a == 1){
+	    while(a > b){
+              a = b;
+          }
+	}
+}
 $
